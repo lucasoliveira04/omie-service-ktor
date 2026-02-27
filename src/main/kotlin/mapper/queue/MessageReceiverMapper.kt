@@ -1,6 +1,6 @@
 package com.omie.mapper.queue
 
-import com.omie.dto.messageSQS.MessageSQS
+import com.omie.dto.messageSQS.receiver.MessageSQS
 
 object MessageReceiverMapper {
 

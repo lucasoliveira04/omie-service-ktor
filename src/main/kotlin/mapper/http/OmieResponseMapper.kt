@@ -10,13 +10,11 @@ object OmieResponseMapper {
     private val objectMapper = jacksonObjectMapper().apply {
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     }
-
     fun parseBody(raw: String): OmieResponseBody? = try {
         objectMapper.readValue(raw)
     } catch (ex: Exception) {
         throw ex
     }
-
     fun parseError(raw: String): OmieErrorDto? = try {
         objectMapper.readValue(raw)
     } catch (ex: Exception) {

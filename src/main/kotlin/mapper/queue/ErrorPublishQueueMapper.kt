@@ -1,7 +1,7 @@
 package com.omie.mapper.queue
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.omie.dto.messageSQS.FaturaDto
+import com.omie.dto.messageSQS.receiver.FaturaDto
 import com.omie.dto.messageSQS.erroFatura.ErrorQueueDto
 import com.omie.dto.omieApi.OmieResponse
 
