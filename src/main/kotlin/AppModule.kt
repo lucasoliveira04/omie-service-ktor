@@ -11,6 +11,7 @@ import com.omie.services.clientHttp.HttpClientService
 import com.omie.services.omie.FaturaPublishService
 import com.omie.services.omie.IdempotencyServiceImpl
 import com.omie.services.omie.OmieGateway
+import com.omie.services.omie.OmieRetryConfig
 import com.omie.services.omie.ProcessLoteService
 import com.omie.services.rabbitMqConsumer.AmqpConsumer
 import com.omie.services.rabbitMqConsumer.AmqpPublish
@@ -53,7 +54,8 @@ val appModule = module {
 
     // Services
     single<ClientHttp> { HttpClientService() }
-    single { OmieGateway(get()) }
+    single { OmieRetryConfig() }
+    single { OmieGateway(get(), get()) }
     single<IdempotencyService> {
         val ttl = get<Config>(named("redisConfig"))
             .getLong("idempotency.ttlSeconds")
