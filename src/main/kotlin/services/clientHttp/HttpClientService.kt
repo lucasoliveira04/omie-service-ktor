@@ -29,7 +29,8 @@ class HttpClientService : ClientHttp {
             setBody(body)
         }
 
-        log.info(response.toString())
+        val rawBody = response.bodyAsText()
+        log.info("HTTP POST para $url | status=${response.status.value} | body=$rawBody")
 
         return HttpResponse(
             status = response.status.value,

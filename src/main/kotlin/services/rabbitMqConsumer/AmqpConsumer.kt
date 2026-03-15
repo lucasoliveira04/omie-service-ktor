@@ -42,12 +42,14 @@ class AmqpConsumer<T>(
                     channel.basicAck(delivery.envelope.deliveryTag, false)
 
                 } catch (e: Exception) {
-                    log.info("Erro ao processar mensagem da fila {}: {}", queueName, e.message)
+                    log.error("Erro ao processar mensagem da fila {}: {}", queueName, e.message)
                     e.printStackTrace()
+                    channel.basicNack(delivery.envelope.deliveryTag, false, true)
                 }
             }
         }
 
+        channel.basicQos(10)
         channel.basicConsume(queueName, false, deliverCallback) {}
     }
 }

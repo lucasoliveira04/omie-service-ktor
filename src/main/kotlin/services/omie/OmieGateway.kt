@@ -4,6 +4,8 @@ import com.omie.dto.omieApi.OmieResponse
 import com.omie.helpers.HttpResponseHelper
 import com.omie.services.ClientHttp
 import com.typesafe.config.ConfigFactory
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 class OmieGateway(
     private val clientHttp: ClientHttp
@@ -12,24 +14,22 @@ class OmieGateway(
     private val base_url = config.getConfig("omie.api-sandbox").getString("base-url")
     private val uri = config.getConfig("omie.api-sandbox").getString("uri")
     private val responseHelper = HttpResponseHelper()
+    private val rateLimite = Semaphore(5)
     suspend fun sendFatura(body: Any): OmieResponse {
-        val url = "$base_url$uri"
+        rateLimite.withPermit {
+            val url = "$base_url$uri"
 
-        val rawResponse = clientHttp.post(
-            url = url,
-            body = body,
-            headers = mapOf("Content-Type" to "application/json")
-        )
+            val rawResponse = clientHttp.post(
+                url = url,
+                body = body,
+                headers = mapOf("Content-Type" to "application/json")
+            )
 
-        responseHelper.parse(
-            status = rawResponse.status,
-            headers = rawResponse.headers,
-            body = rawResponse.body
-        )
-        return responseHelper.parse(
-            status = rawResponse.status,
-            headers = rawResponse.headers,
-            body = rawResponse.body
-        )
+            return responseHelper.parse(
+                status = rawResponse.status,
+                headers = rawResponse.headers,
+                body = rawResponse.body
+            )
+        }
     }
 }

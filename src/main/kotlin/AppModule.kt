@@ -26,26 +26,50 @@ val appModule = module {
     single(qualifier = named("omieConfig")) {
         get<Config>(named("rootConfig")).getConfig("omie.api-sandbox")
     }
+    single(qualifier = named("rabbitmqConfig")) {
+        get<Config>(named("rootConfig")).getConfig("rabbitmq")
+    }
+    single(qualifier = named("redisConfig")) {
+        get<Config>(named("rootConfig")).getConfig("redis")
+    }
 
-    // Infra
-    single { AmqpConfig().connect() }
-    single { RedisConfig(get<Config>(named("rootConfig")).getString("redis.url")).commands }
+    // Infra - RabbitMQ
+    single {
+        val cfg = get<Config>(named("rabbitmqConfig"))
+        AmqpConfig(
+            host        = cfg.getString("host"),
+            port        = cfg.getInt("port"),
+            username    = cfg.getString("username"),
+            password    = cfg.getString("password"),
+            virtualHost = cfg.getString("virtualHost")
+        ).connect()
+    }
+
+    // Infra - Redis
+    single {
+        val url = get<Config>(named("redisConfig")).getString("url")
+        RedisConfig(url).commands
+    }
 
     // Services
     single<ClientHttp> { HttpClientService() }
     single { OmieGateway(get()) }
-    single<IdempotencyService> { IdempotencyServiceImpl(get()) }
+    single<IdempotencyService> {
+        val ttl = get<Config>(named("redisConfig"))
+            .getLong("idempotency.ttlSeconds")
+        IdempotencyServiceImpl(get(), ttl)
+    }
     single<MessagePublish> { AmqpPublish(get()) }
     single { FaturaPublishService(get()) }
 
     single {
         val cfg = get<Config>(named("omieConfig"))
         ProcessLoteService(
-            omieGateway = get(),
+            omieGateway        = get(),
             idempotencyService = get(),
-            key = cfg.getString("key"),
-            secret = cfg.getString("secret"),
-            publishService = get()
+            key                = cfg.getString("key"),
+            secret             = cfg.getString("secret"),
+            publishService     = get()
         )
     }
 

@@ -9,5 +9,6 @@ data class FaturaDto(
     val codigoCategoria: String,
     val dataPrevisao: String,
     val idContaCorrente: Long,
-    val keyFatura: String
+    val keyFatura: String,
+    val tipoCliente: String = "default"
 )
