@@ -55,7 +55,15 @@ val appModule = module {
     // Services
     single<ClientHttp> { HttpClientService() }
     single { OmieRetryConfig() }
-    single { OmieGateway(get(), get()) }
+    single {
+        val cfg = get<Config>(named("omieConfig"))
+        OmieGateway(
+            clientHttp = get(),
+            omieRetryConfig = get(),
+            baseUrl = cfg.getString("base-url"),
+            uri = cfg.getString("uri")
+            )
+    }
     single<IdempotencyService> {
         val ttl = get<Config>(named("redisConfig"))
             .getLong("idempotency.ttlSeconds")

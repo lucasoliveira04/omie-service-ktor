@@ -13,14 +13,12 @@ class FaturaPublishService(
     private val publishService: MessagePublish
 ) {
     private val log = LoggerFactory.getLogger(FaturaPublishService::class.java)
-
     private fun buildMetadata(
         fatura: FaturaDto,
         loteId: String,
         status: String,
         eventType: String,
     ): Map<String, String> {
-
         return mapOf(
             "correlationId" to loteId,
             "messageId" to fatura.id,
@@ -52,13 +50,14 @@ class FaturaPublishService(
         )
     }
 
-    suspend fun publicarErroOmie(
+    // Erro por rejeição individual da fatura (codigo_status != "0")
+    suspend fun publicarErroRejeicaoOmie(
         fatura: FaturaDto,
         response: OmieResponse,
         loteId: String
     ) {
 
-        val dto = ErrorPublishQueueMapper.mapFromOmieError(fatura, response)
+        val dto = ErrorPublishQueueMapper.mapFromOmieRejeicao(fatura, response, loteId)
 
         publishService.publish(
             queueName = QueueEnum.BOWE_DEV_ERROR_FATURA.queue,
@@ -72,13 +71,34 @@ class FaturaPublishService(
         )
     }
 
+    // Erro geral do lote retornado pelo Omie (credencial inválida, lote mal formado, etc)
+    suspend fun publicarErroLoteOmie(
+        fatura: FaturaDto,
+        response: OmieResponse,
+        loteId: String
+    ) {
+        val dto = ErrorPublishQueueMapper.mapFromOmieErroLote(fatura, response, loteId)
+
+        publishService.publish(
+            queueName = QueueEnum.BOWE_DEV_ERROR_FATURA.queue,
+            message = dto,
+            metadata = buildMetadata(
+                fatura = fatura,
+                loteId = loteId,
+                status = "error",
+                eventType = "gerar_fatura_omie_erro_lote"
+            )
+        )
+    }
+
+    // Erro interno inesperado
     suspend fun publicarErroException(
         fatura: FaturaDto,
         exception: Exception,
         loteId: String
     ) {
 
-        val dto = ErrorPublishQueueMapper.mapFromException(fatura, exception)
+        val dto = ErrorPublishQueueMapper.mapFromException(fatura, exception, loteId)
 
         publishService.publish(
             queueName = QueueEnum.BOWE_DEV_ERROR_FATURA.queue,

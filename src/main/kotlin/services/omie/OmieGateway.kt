@@ -17,12 +17,10 @@ import java.util.concurrent.TimeoutException
 
 class OmieGateway(
     private val clientHttp: ClientHttp,
-    private val omieRetryConfig: OmieRetryConfig
-) {
-    private val config = ConfigFactory.load()
-    private val baseUrl = config.getConfig("omie.api-sandbox").getString("base-url")
-    private val uri = config.getConfig("omie.api-sandbox").getString("uri")
-    private val responseHelper = HttpResponseHelper()
+    private val omieRetryConfig: OmieRetryConfig,
+    private val baseUrl: String,
+    private val uri: String
+) { private val responseHelper = HttpResponseHelper()
     private val rateLimite = Semaphore(3)
 
     suspend fun sendFatura(body: Any): OmieResponse {

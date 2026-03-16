@@ -2,7 +2,6 @@ package com.omie.helpers
 
 import com.omie.dto.omieApi.OmieResponse
 import com.omie.mapper.http.OmieResponseMapper
-import kotlin.collections.emptyList
 
 class HttpResponseHelper {
 
@@ -14,7 +13,9 @@ class HttpResponseHelper {
 
         val errorDto = OmieResponseMapper.parseError(body)
 
-        if (errorDto != null && errorDto.message != null) {
+        // Trata erro se qualquer campo de erro estiver preenchido.
+        // O Omie pode retornar faultstring/faultcode sem preencher message.
+        if (errorDto != null && (errorDto.message != null || errorDto.faultstring != null || errorDto.faultcode != null)) {
             return OmieResponse(
                 http_status = status,
                 headers = mapOf("Content-Type" to "application/json"),

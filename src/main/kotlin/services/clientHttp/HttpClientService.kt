@@ -2,7 +2,6 @@ package com.omie.services.clientHttp
 
 import com.omie.dto.http.HttpResponse
 import com.omie.services.ClientHttp
-import com.omie.services.omie.ProcessLoteService
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*

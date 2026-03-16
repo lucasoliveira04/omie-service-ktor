@@ -28,4 +28,9 @@ class IdempotencyServiceImpl(
         val result = redis.set(lockKey, "locked", SetArgs.Builder.nx().ex(30))
         return result != null
     }
+
+    override suspend fun releaseLock(key: String) {
+        val lockKey = "lock:fatura:$key"
+        redis.del(lockKey)
+    }
 }
